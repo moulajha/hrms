@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  phone       String
+  gst         String?  @unique
+  pan         String?  @unique
+  address     String
+  city        String
+  state       String
+  pincode     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  associates  Associate[]
+  clients     Client[]
+  deployments Deployment[]
+}
+
+model Associate {
+  id            String   @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String   @unique
+  phone         String
+  aadhaar       String?  @unique
+  pan           String?  @unique
+  address       String
+  city          String
+  state         String
+  pincode       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  deployments    Deployment[]
+}
+
+model Client {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  phone         String
+  gst           String?  @unique
+  pan           String?  @unique
+  address       String
+  city          String
+  state         String
+  pincode       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  deployments    Deployment[]
+}
+
+model Deployment {
+  id            String   @id @default(uuid())
+  startDate     DateTime
+  endDate       DateTime?
+  billRate      Float
+  payRate       Float
+  status        DeploymentStatus @default(ACTIVE)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  associateId    String
+  associate      Associate    @relation(fields: [associateId], references: [id])
+  clientId       String
+  client         Client       @relation(fields: [clientId], references: [id])
+}
+
+enum DeploymentStatus {
+  ACTIVE
+  COMPLETED
+  TERMINATED
+}
